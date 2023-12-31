@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Get the path to the directory containing this script
+DOTFILES=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+# The .config directory within the dotfiles repository
+DOTFILES_CONFIG_DIR="$DOTFILES/.config"
+
+# Your system's .config directory
+SYSTEM_CONFIG_DIR="$HOME/.config"
+
+# Create the system's .config directory if it doesn't exist
+mkdir -p "$SYSTEM_CONFIG_DIR"
+
+# Iterate over each item in the dotfiles .config directory
+find "$DOTFILES_CONFIG_DIR" -mindepth 1 -maxdepth 1 | while read item; do
+	# Extract the item's basename
+	item_name=$(basename "$item")
+
+	# Check for existing symlinks or files in the system .config directory
+	if [ -L "$SYSTEM_CONFIG_DIR/$item_name" ] || [ -e "$SYSTEM_CONFIG_DIR/$item_name" ]; then
+		echo "A file or symlink for $item_name already exists in the system .config directory. Skipping."
+	else
+		# Create a symlink for the directory or file in the system .config directory
+		ln -s "$item" "$SYSTEM_CONFIG_DIR/$item_name"
+		echo "Symlink created for $item_name"
+	fi
+done
+
+echo "Symlinks installation is complete."
